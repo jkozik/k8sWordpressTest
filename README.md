@@ -21,6 +21,7 @@ ls
 mysql-deploy.yml  pvc-mysql.yml  pvc-wordpress.yml  pv-wordpress-mysql.yml  README  README.md  secret.yml  wordpress-deploy.yml
 [jkozik@dell2 k8sWordpressTest]$
 ```
+## Persistent Volume
 For starters, get the presistent volume setup.  Verify that the specifics in the file pv-wordpress-mysql.yml nfs sections are appropriately customized:
 ```
 vi pv-wordpress-mysql.yml
@@ -74,6 +75,7 @@ persistentvolumeclaim/mysql-persistent-storage       Bound    mysql-persistent-s
 persistentvolumeclaim/wordpress-persistent-storage   Bound    wordpress-persistent-storage   1Gi        RWX                           42h
 [jkozik@dell2 ~]$
 ```
+## Deploy Mysql with Secret
 Next, wordpress needs a password to talk to mysql. The secret.yml file needs to be applyed to create the password secret resource.  Then deploy the mysql pod and expose it as a service.
 ```
 kubectl apply -f secret.yml
@@ -85,6 +87,8 @@ kubectl logs wordpress-mysql-xxxx-yyyy
 kubectl describe pods wordpress-mysql-xxxx-yyyy
 ```
 I put a break here, because when I first did this, I had troubles with my nfs mounts that did not show up with PV, PVC steps.  The kubectl logs command gave me good diagnostics.
+
+## Deploy Wordpress
 Next, apply the wordpress deployment yaml file and expose it as a NodePort service. Key point: you need a NodePort service inorder to be able externally access the service.  The mysql service is a ClusterIP -- only visible at the cluster level.
 ```
 kubectl apply -f wordpress-deploy.yml
@@ -93,6 +97,7 @@ kubectl get pods --all-namespaces -o wide
 kubectl describe pods wordpress-xxxx-yyyy
 kubectl logs pods wordpress-xxxx-yyyy
 ```
+## Test in browser
 From here, go to a browser and access http://192.168.100.172:3xxxx. This should be the wordpress installation screen.
 
 # References
